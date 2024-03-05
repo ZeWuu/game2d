@@ -9,66 +9,66 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-import game2d.entity.Tiles;
+import game2d.main.Constants;
 import game2d.main.GamePanel;
 import game2d.main.Main;
 
 public class TileManager {
 
-    GamePanel gp;
-    Map<Tiles, Tile> tiles = new HashMap<Tiles, Tile>();
-    int mapTileNum[][];
+    private GamePanel gp;
+    private Map<Tiles, TileBuilder> tiles = new HashMap<Tiles, TileBuilder>();
+    public int tilesMap[][];
 
     public TileManager(GamePanel gp) {
         this.gp = gp;
-        mapTileNum = new int[gp.maxScreenColumn][gp.maxScreenRow];
+        tilesMap = new int[Constants.maxWorldCol][Constants.maxWorldRow];
         getTileImage();
-        loadMap("/maps/map01.txt");
+        loadMap("/maps/Map.txt");
     }
 
-    public void getTileImage() {
+    private void getTileImage() {
         try {
-            tiles.put(Tiles.GOLDEN_GRASS, new Tile.builder()
-                    .image(ImageIO.read(Main.class.getResourceAsStream("/tiles/GoldenGrass.png")))
+            tiles.put(Tiles.GOLDEN_GRASS, new TileBuilder.builder()
+                    .image(ImageIO.read(Main.class.getResourceAsStream("/tiles/GoldenGrass.png"))).collidable(false)
                     .build());
-            tiles.put(Tiles.GOLDEN_TREE, new Tile.builder()
-                    .image(ImageIO.read(Main.class.getResourceAsStream("/tiles/GoldenTree.png")))
+            tiles.put(Tiles.GOLDEN_TREE, new TileBuilder.builder()
+                    .image(ImageIO.read(Main.class.getResourceAsStream("/tiles/GoldenTree.png"))).collidable(true)
                     .build());
-            tiles.put(Tiles.WATER, new Tile.builder()
-                    .image(ImageIO.read(Main.class.getResourceAsStream("/tiles/Water.png"))).build());
-            tiles.put(Tiles.BRICK_WALL,
-                    new Tile.builder()
-                            .image(ImageIO.read(Main.class.getResourceAsStream("/tiles/BrickWall.png")))
-                            .build());
-            tiles.put(Tiles.SAND, new Tile.builder()
-                    .image(ImageIO.read(Main.class.getResourceAsStream("/tiles/Sand.png"))).build());
-            tiles.put(Tiles.ROAD, new Tile.builder()
-                    .image(ImageIO.read(Main.class.getResourceAsStream("/tiles/Road.png"))).build());
+            tiles.put(Tiles.WATER, new TileBuilder.builder()
+                    .image(ImageIO.read(Main.class.getResourceAsStream("/tiles/Water.png"))).collidable(true)
+                    .build());
+            tiles.put(Tiles.BRICK_WALL,new TileBuilder.builder()
+                    .image(ImageIO.read(Main.class.getResourceAsStream("/tiles/BrickWall.png"))).collidable(true)
+                    .build());
+            tiles.put(Tiles.SAND, new TileBuilder.builder()
+                    .image(ImageIO.read(Main.class.getResourceAsStream("/tiles/Sand.png"))).collidable(false)
+                    .build());
+            tiles.put(Tiles.ROAD, new TileBuilder.builder()
+                    .image(ImageIO.read(Main.class.getResourceAsStream("/tiles/Road.png"))).collidable(false)
+                    .build());
+            tiles.put(Tiles.LIGHT_BRICK_ROAD, new TileBuilder.builder()
+                    .image(ImageIO.read(Main.class.getResourceAsStream("/tiles/LightBrickRoad.png"))).collidable(false)
+                    .build());
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println(tiles);
     }
 
-    public void loadMap(String filePath) {
+    public boolean isTileCollidable(int tileID) {
+        return tiles.get(Tiles.values()[tileID]).collidable;
+    }
+
+    private void loadMap(String filePath) {
         try {
             InputStream is = getClass().getResourceAsStream(filePath);
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
-            int col = 0;
-            int row = 0;
-
-            while (col < gp.maxScreenColumn && row < gp.maxScreenRow) {
+            for (int i = 0; i < Constants.maxWorldRow; i++) {
                 String line = br.readLine();
-                while (col < gp.maxScreenColumn) {
-                    String numbers[] = line.split(" ");
-                    int num = Integer.parseInt(numbers[col]);
-                    mapTileNum[col][row] = num;
-                    col++;
-                }
-                if (col == gp.maxScreenColumn) {
-                    col = 0;
-                    row++;
+                String[] tilesNumbers = line.split(" ");
+                for (int j = 0; j < Constants.maxWorldCol; j++) {
+                    int num = Integer.parseInt(tilesNumbers[j]);
+                    tilesMap[j][i] = num;
                 }
             }
             br.close();
@@ -79,23 +79,28 @@ public class TileManager {
     }
 
     public void draw(Graphics2D g2) {
-        int col = 0;
-        int row = 0;
-        int x = 0;
-        int y = 0;
 
-        while (col < gp.maxScreenColumn && row < gp.maxScreenRow) {
-            int tileNum = mapTileNum[col][row];
-            g2.drawImage(tiles.get(Tiles.values()[tileNum]).image, x, y, gp.tileSize, gp.tileSize, null);
-            col++;
-            x += gp.tileSize;
-
-            if (col == gp.maxScreenColumn) {
-                col = 0;
-                x = 0;
-                row++;
-                y += gp.tileSize;
+        for (int i = 0; i < Constants.maxWorldRow; i++) {
+            for (int j = 0; j < Constants.maxWorldCol; j++) {
+                int tileNum = tilesMap[j][i];
+                int worldX = j * Constants.tileSize;
+                int worldY = i * Constants.tileSize;
+                int screenX = worldX - gp.player.entityXPos + Constants.playerX;
+                int screenY = worldY - gp.player.entityYPos + Constants.playerY;
+                g2.drawImage(tiles.get(Tiles.values()[tileNum]).image, screenX, screenY, Constants.tileSize,
+                        Constants.tileSize, null);
             }
         }
+    }
+
+    public Map<Tiles, TileBuilder> getTiles() {
+        return tiles;
+    }
+
+    public int getTileID(int tileX, int tileY) {
+        if (tileX < 0 || tileX >= Constants.maxWorldCol || tileY < 0 || tileY >= Constants.maxWorldRow) {
+            return 0;
+        }
+        return tilesMap[tileX][tileY];
     }
 }

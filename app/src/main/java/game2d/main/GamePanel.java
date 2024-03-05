@@ -12,29 +12,16 @@ import game2d.tile.TileManager;
 
 public class GamePanel extends JPanel implements Runnable {
 
-    final int originalTileSize = 16;
-    final int scale = 3;
-
-    public final int tileSize = originalTileSize * scale;
-
-    final public int maxScreenColumn = 16;
-    final public int maxScreenRow = 12;
-
-    final public int screenWidth = tileSize * maxScreenColumn;
-    final public int screenHeight = tileSize * maxScreenRow;
-
-    int FPS = 60;
-
-    TileManager tileM = new TileManager(this);
-    KeyHandler keyH = new KeyHandler();
-    Thread gameThread;
-    Player player = new Player(this, keyH);
+    private KeyHandler key = new KeyHandler();
+    private TileManager tile = new TileManager(this);
+    public Player player = new Player(key, tile);
+    private Thread gameThread;
 
     public GamePanel() {
-        this.setPreferredSize(new Dimension(screenWidth, screenHeight));
+        this.setPreferredSize(new Dimension(Constants.visibleWidth, Constants.visibleHeight));
         this.setBackground(Color.black);
         this.setDoubleBuffered(true);
-        this.addKeyListener(keyH);
+        this.addKeyListener(key);
         this.setFocusable(true);
     }
 
@@ -46,24 +33,24 @@ public class GamePanel extends JPanel implements Runnable {
     @Override
     public void run() {
 
-        double drawInterval = 1000000000 / FPS;
-        double nextDrawTime = System.nanoTime() + drawInterval;
+        double drawingBreak = 1000000000 / Constants.FPS;
+        double drawingMoment = System.nanoTime() + drawingBreak;
 
         while (gameThread != null) {
 
             update();
             repaint();
+            checkCollision();
 
             try {
-                double remainingTime = nextDrawTime - System.nanoTime();
-                remainingTime = remainingTime / 1000000;
+                double remainingTime = (drawingMoment - System.nanoTime()) / 1000000;
 
                 if (remainingTime < 0) {
                     remainingTime = 0;
                 }
 
                 Thread.sleep((long) remainingTime);
-                nextDrawTime += drawInterval;
+                drawingMoment += drawingBreak;
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -75,12 +62,18 @@ public class GamePanel extends JPanel implements Runnable {
         player.update();
     }
 
+    public void checkCollision() {
+        player.checkBorderCollision();
+
+    }
+
+
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
         Graphics2D g2 = (Graphics2D) g;
 
-        tileM.draw(g2);
+        tile.draw(g2);
         player.draw(g2);
 
         g2.dispose();

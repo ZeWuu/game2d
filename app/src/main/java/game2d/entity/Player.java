@@ -4,27 +4,33 @@ import java.awt.Graphics2D;
 
 import javax.imageio.ImageIO;
 
-import game2d.main.GamePanel;
+import game2d.main.Constants;
 import game2d.main.KeyHandler;
+import game2d.tile.TileManager;
 
 public class Player extends Entity {
-    KeyHandler keyH;
 
-    public Player(GamePanel gp, KeyHandler keyH) {
-        super(gp);
-        this.keyH = keyH;
+    private KeyHandler key;
+    private TileManager tm;
+
+    public Player(KeyHandler key, TileManager tm) {
+
+        this.key = key;
+        this.tm = tm;
+
         setDefaultValues();
         getPlayerImage();
+
     }
 
     public void setDefaultValues() {
-        x = 100;
-        y = 100;
+        entityXPos = Constants.tileSize * 8;
+        entityYPos = Constants.tileSize * 56;
         speed = 4;
         direction = "down";
     }
 
-    public void getPlayerImage(){
+    public void getPlayerImage() {
         try {
             down1 = ImageIO.read(getClass().getResourceAsStream("/player/Front1.png"));
             down2 = ImageIO.read(getClass().getResourceAsStream("/player/Front2.png"));
@@ -34,30 +40,61 @@ public class Player extends Entity {
             right2 = ImageIO.read(getClass().getResourceAsStream("/player/Right2.png"));
             left1 = ImageIO.read(getClass().getResourceAsStream("/player/Left1.png"));
             left2 = ImageIO.read(getClass().getResourceAsStream("/player/Left2.png"));
-          
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    public void checkBorderCollision() {
+        if (entityXPos < 0) {
+            entityXPos = 0;
+        }
+        if (entityXPos > Constants.worldWidth - Constants.tileSize) {
+            entityXPos = Constants.worldWidth - Constants.tileSize;
+        }
+        if (entityYPos < 0) {
+            entityYPos = 0;
+        }
+        if (entityYPos > Constants.worldHeight - Constants.tileSize) {
+            entityYPos = Constants.worldHeight - Constants.tileSize;
+        }
+    }
+
+    public boolean checkTileCollision(int entityX, int entityY) {
+        int tileX = entityX / Constants.tileSize;
+        int tileY = entityY / Constants.tileSize;
+        int otherTileX = (entityX + Constants.tileSize - 1) / Constants.tileSize;
+        int otherTileY = (entityY + Constants.tileSize - 1) / Constants.tileSize;
+        return tm.isTileCollidable(tm.getTileID(tileX, tileY))
+                || tm.isTileCollidable(tm.getTileID(otherTileX, otherTileY))
+                || tm.isTileCollidable(tm.getTileID(tileX, otherTileY))
+                || tm.isTileCollidable(tm.getTileID(otherTileX, tileY));
+
+    }
+
     public void update() {
-        if (keyH.downPressed == true || keyH.leftPressed == true || keyH.rightPressed == true
-                || keyH.upPressed == true) {
-            if (keyH.upPressed == true) {
+        if (key.downPressed || key.leftPressed || key.rightPressed
+                || key.upPressed) {
+            if (key.upPressed) {
                 direction = "up";
-                y -= speed;
+                if (!checkTileCollision(entityXPos, entityYPos - speed))
+                    entityYPos -= speed;
             }
-            if (keyH.downPressed == true) {
+            if (key.downPressed) {
                 direction = "down";
-                y += speed;
+                if (!checkTileCollision(entityXPos, entityYPos + speed))
+                    entityYPos += speed;
             }
-            if (keyH.leftPressed == true) {
+            if (key.leftPressed) {
                 direction = "left";
-                x -= speed;
+                if (!checkTileCollision(entityXPos - speed, entityYPos))
+                    entityXPos -= speed;
             }
-            if (keyH.rightPressed == true) {
+            if (key.rightPressed) {
                 direction = "right";
-                x += speed;
+                if (!checkTileCollision(entityXPos + speed, entityYPos))
+                    entityXPos += speed;
             }
             spriteCounter++;
             if (spriteCounter > 12) {
@@ -100,6 +137,6 @@ public class Player extends Entity {
                     image = left2;
                 break;
         }
-        super.draw(g2);
+        g2.drawImage(image, Constants.playerX, Constants.playerY, Constants.tileSize, Constants.tileSize, null);
     }
 }

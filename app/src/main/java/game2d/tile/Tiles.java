@@ -1,4 +1,4 @@
-package game2d.entity;
+package game2d.tile;
 
 public enum Tiles {
     GOLDEN_GRASS,
@@ -6,5 +6,6 @@ public enum Tiles {
     WATER,
     BRICK_WALL,
     SAND,
-    ROAD
+    ROAD,
+    LIGHT_BRICK_ROAD;
 }
