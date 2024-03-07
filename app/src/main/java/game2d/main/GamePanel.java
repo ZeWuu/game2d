@@ -4,25 +4,44 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import javax.swing.JPanel;
 
+import game2d.entity.FlameSlime;
 import game2d.entity.Player;
 import game2d.tile.TileManager;
 
 public class GamePanel extends JPanel implements Runnable {
 
+    private int slimesCount = 200;
+    private Random random = new Random();
+
     private KeyHandler key = new KeyHandler();
     private TileManager tile = new TileManager(this);
     public Player player = new Player(key, tile);
     private Thread gameThread;
-
+    private List<FlameSlime> slimes = new ArrayList<FlameSlime>();
+    
     public GamePanel() {
         this.setPreferredSize(new Dimension(Constants.visibleWidth, Constants.visibleHeight));
         this.setBackground(Color.black);
         this.setDoubleBuffered(true);
         this.addKeyListener(key);
         this.setFocusable(true);
+        this.addingSlimes();
+    }
+
+    private void addingSlimes() {
+        for (int i = 0; i < slimesCount; i++) {
+            int tileX = random.nextInt(Constants.maxWorldCol);
+            int tileY = random.nextInt(Constants.maxWorldRow);
+            if(!tile.isTileCollidable(tile.getTileID(tileX, tileY)))
+                slimes.add(new FlameSlime(this, tileX,tileY));
+            else i--;
+        }
     }
 
     public void startGameThread() {
@@ -60,13 +79,15 @@ public class GamePanel extends JPanel implements Runnable {
 
     public void update() {
         player.update();
+        for (FlameSlime flameSlime : slimes) {
+            flameSlime.update();
+        }
     }
 
     public void checkCollision() {
         player.checkBorderCollision();
 
     }
-
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -75,6 +96,9 @@ public class GamePanel extends JPanel implements Runnable {
 
         tile.draw(g2);
         player.draw(g2);
+        for (FlameSlime flameSlime : slimes) {
+            flameSlime.draw(g2);
+        }
 
         g2.dispose();
     }
