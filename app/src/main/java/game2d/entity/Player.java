@@ -1,7 +1,6 @@
 package game2d.entity;
 
 import java.awt.Graphics2D;
-import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -67,7 +66,7 @@ public class Player extends Entity {
         }
     }
 
-    private boolean checkTileCollision(int entityX, int entityY) {
+    public boolean checkTileCollision(int entityX, int entityY) {
         int tileX = entityX / Constants.tileSize;
         int tileY = entityY / Constants.tileSize;
         int otherTileX = (entityX + Constants.tileSize - 1) / Constants.tileSize;
@@ -93,7 +92,7 @@ public class Player extends Entity {
         return false;
     }
 
-    private void removeSlime(){
+    public void removeSlime(){
         for (int i = 0; i < gp.getSlimes().size(); i++) {
             if (gp.getSlimes().get(i).getX() == entityXPos/Constants.tileSize && gp.getSlimes().get(i).getY() == entityYPos/Constants.tileSize) {
                 gp.getSlimes().remove(i);
