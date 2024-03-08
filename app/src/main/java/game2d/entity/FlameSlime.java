@@ -11,6 +11,7 @@ public class FlameSlime extends Entity {
 
     private GamePanel gp;
     private int x, y;
+  
 
     public FlameSlime(GamePanel gp, int x, int y) {
         this.x = x;
@@ -46,6 +47,12 @@ public class FlameSlime extends Entity {
             }
         }
 
+    }
+    public int getX(){
+        return entityXPos;
+    }
+    public int getY(){
+        return entityYPos;
     }
 
     @Override

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import game2d.entity.FlameSlime;
@@ -21,7 +22,7 @@ public class GamePanel extends JPanel implements Runnable {
 
     private KeyHandler key = new KeyHandler();
     private TileManager tile = new TileManager(this);
-    public Player player = new Player(key, tile);
+    public Player player = new Player(key, tile, this);
     private Thread gameThread;
     private List<FlameSlime> slimes = new ArrayList<FlameSlime>();
     
@@ -32,6 +33,7 @@ public class GamePanel extends JPanel implements Runnable {
         this.addKeyListener(key);
         this.setFocusable(true);
         this.addingSlimes();
+
     }
 
     private void addingSlimes() {
@@ -84,6 +86,17 @@ public class GamePanel extends JPanel implements Runnable {
         }
     }
 
+    public List<FlameSlime> getSlimes() {
+        return slimes;
+    }
+    
+    public void eatenSlimesLabel() {
+        JLabel eatenSlimes = new JLabel("Eaten Slimes: " + player.getEatenSlimes());
+        eatenSlimes.setBackground(Color.white);
+        eatenSlimes.setBounds(20, 10, 100, 20);
+        add(eatenSlimes);
+}
+
     public void checkCollision() {
         player.checkBorderCollision();
 
@@ -94,11 +107,13 @@ public class GamePanel extends JPanel implements Runnable {
 
         Graphics2D g2 = (Graphics2D) g;
 
+        eatenSlimesLabel();
         tile.draw(g2);
         player.draw(g2);
         for (FlameSlime flameSlime : slimes) {
             flameSlime.draw(g2);
         }
+    
 
         g2.dispose();
     }
