@@ -5,11 +5,11 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
 import javax.swing.JPanel;
-
 import game2d.entity.FlameSlime;
 import game2d.entity.Player;
 import game2d.tile.TileManager;
@@ -24,6 +24,7 @@ public class GamePanel extends JPanel implements Runnable {
     public Player player = new Player(key, tile, this);
     public Thread gameThread;
     private List<FlameSlime> slimes = new ArrayList<FlameSlime>();
+    private CountingPanel countingPanel = new CountingPanel(this, player);
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(Constants.visibleWidth, Constants.visibleHeight));
@@ -32,6 +33,7 @@ public class GamePanel extends JPanel implements Runnable {
         this.addKeyListener(key);
         this.setFocusable(true);
         this.addingSlimes();
+        this.add(countingPanel);
 
     }
 
@@ -44,6 +46,10 @@ public class GamePanel extends JPanel implements Runnable {
             else
                 i--;
         }
+    }
+
+    public int getSlimesCount() {
+        return slimesCount;
     }
 
     public void startGameThread() {
@@ -104,7 +110,9 @@ public class GamePanel extends JPanel implements Runnable {
         player.draw(g2);
 
         if (slimes != null) {
-            for (FlameSlime flameSlime : slimes) {
+            Iterator<FlameSlime> it = slimes.iterator();
+            while (it.hasNext()) {
+                FlameSlime flameSlime = (FlameSlime) it.next();
                 flameSlime.draw(g2);
             }
         }

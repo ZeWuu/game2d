@@ -61,14 +61,11 @@ class PlayerTest {
         int entityX = 10;
         int entityY = 20;
 
-        // Set up mock behavior for the TileMap
         Mockito.when(tm.getTileID(Mockito.anyInt(), Mockito.anyInt())).thenReturn(0);
         Mockito.when(tm.isTileCollidable(Mockito.anyInt())).thenReturn(true);
 
-        // Call the method to test
         boolean result = player.checkTileCollision(entityX, entityY);
 
-        // Assert the result
         assertTrue(result);
     }
 

@@ -1,6 +1,8 @@
 package game2d.entity;
 
 import java.awt.Graphics2D;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -93,13 +95,17 @@ public class Player extends Entity {
     }
 
     public void removeSlime(){
-        for (int i = 0; i < gp.getSlimes().size(); i++) {
-            if (gp.getSlimes().get(i).getX() == entityXPos/Constants.tileSize && gp.getSlimes().get(i).getY() == entityYPos/Constants.tileSize) {
-                gp.getSlimes().remove(i);
+        List<FlameSlime> slimes = gp.getSlimes(); //iterator prevents concurrent modification exception
+        Iterator<FlameSlime> it = slimes.iterator();
+        while(it.hasNext()){
+            FlameSlime flameSlime = it.next();
+            if(flameSlime.entityXPos == entityXPos/Constants.tileSize && flameSlime.entityYPos == entityYPos/Constants.tileSize){
+                it.remove();
                 eatenSlimes++;
                 break;
             }
         }
+    
     }
     public int getEatenSlimes() {
         return eatenSlimes;
